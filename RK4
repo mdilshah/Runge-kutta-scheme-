@@ -1,0 +1,56 @@
+ //function 
+fn f(t: f64, y: f64) -> f64 {
+    // For define the differential equation
+    // For example, dy/dt = f(t, y). This function take t and y as
+    //input and return f(t,y)
+    return 1.0 - t.powi(2) + y;
+}
+
+
+/*function for RK4 . takes pointer for the f(x,y), intervel  points   a and b, initial value at t=0 denoted as y0 and number of mesh points n as inputs. This returns 2 vectors t and y . vector t contain grid points and vector y with values of y at the grid points
+
+*/
+
+
+fn rk4(f: fn(f64, f64) -> f64, a: f64, b: f64, y0: f64, n: usize) -> (Vec<f64>, Vec<f64>) {
+    let h = (b - a) / (n as f64); //mesh length
+    let mut t= Vec::with_capacity(n + 1);//initialising the t vector 
+    let mut y = Vec::with_capacity(n + 1);
+    t.push(a); //pushing initial values to the vector
+    y.push(y0);
+    
+    
+    /*Over the loop using ti and yi data that is already available k1, k2, k3 and k4 are calculated. The new time point ti1 and the corresponding solution value yi1 are evaluated and pushed into the vectors t and y, respectively, to store the updated solution at each time point
+    */
+    for _ in 0..n {
+        let ti = *t.last().unwrap(); // take the last value from the vector
+        let yi = *y.last().unwrap();
+        let k1 = h * f(ti, yi);
+        let k2 = h * f(ti + h / 2.0, yi + k1 / 2.0);
+        let k3 = h * f(ti + h / 2.0, yi + k2 / 2.0);
+        let k4 = h * f(ti + h, yi + k3);
+        let yi1 = yi + (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0;
+        let ti1 = ti + h;
+        t.push(ti1);
+        y.push(yi1);
+    }
+
+    (t, y)
+}
+// main function of the program
+fn main() {
+    // Given parameters
+    let a = 0.0; // Initial point of the interval
+    let b = 2.0; // Endpoint of the interval
+    let y0 = 0.5; // Initial condition
+    let n = 10; // Number of steps
+
+    // Solving using RK4
+    let (t, y) = rk4(f, a, b, y0, n);
+
+    // Printing the results
+println!("The y values at the grid points are given by");
+    for (ti, yi) in t.iter().zip(y.iter()) {
+        println!("t = {:.2}, y = {:.6}", ti, yi);
+    }
+}
